@@ -1,0 +1,9 @@
+*.o
+build
+obj
+*.html
+.vscode
+solution/*.bmp
+solution/*/*.bmp
+solution/*/*/*.bmp
+*.exe
