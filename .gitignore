@@ -6,4 +6,5 @@ obj
 solution/*.bmp
 solution/*/*.bmp
 solution/*/*/*.bmp
+*.bmp
 *.exe

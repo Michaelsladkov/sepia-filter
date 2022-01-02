@@ -1,6 +1,6 @@
 #include "file_works/file_works.h"
 #include "image_format/image_format.h"
-#include "rotate/rotate.h"
+#include "sepia/sepia.h"
 
 int main(int argc, char **argv)
 {
@@ -15,7 +15,7 @@ int main(int argc, char **argv)
     print_captioned_status("image reading status: ", image_read_status);
     if (image_read_status != SUCCESS) return 0;
     struct image transformed_image = {0};
-    rotate(input_image, &transformed_image);
+    apply_sepia_no_sse(input_image, &transformed_image);
     const enum return_code image_write_status = image_write_file_bmp(output_file_name, transformed_image);
     print_captioned_status("image writing status: ", image_write_status);
     image_delete(input_image);
