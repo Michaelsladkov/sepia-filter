@@ -24,5 +24,6 @@ void image_delete(const struct image image);
 struct pixel image_get_pixel(const struct image source, const size_t row, const size_t column);
 bool image_set_pixel(const struct image target, const size_t row, const size_t column, const struct pixel new_pixel);
 size_t image_calculate_size(const struct image image);
+struct image image_copy(const struct image image);
 
 #endif

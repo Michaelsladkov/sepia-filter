@@ -4,6 +4,9 @@
 
 int main(int argc, char **argv)
 {
+    struct image im1 = {0}, im2 = {0};
+    apply_sepia(im1, &im2);
+
     if (argc < 3) {
         fprintf(stderr, "not enough args\n");
         return 0;
@@ -15,7 +18,7 @@ int main(int argc, char **argv)
     print_captioned_status("image reading status: ", image_read_status);
     if (image_read_status != SUCCESS) return 0;
     struct image transformed_image = {0};
-    apply_sepia_no_sse(input_image, &transformed_image);
+    apply_sepia(input_image, &transformed_image);
     const enum return_code image_write_status = image_write_file_bmp(output_file_name, transformed_image);
     print_captioned_status("image writing status: ", image_write_status);
     image_delete(input_image);

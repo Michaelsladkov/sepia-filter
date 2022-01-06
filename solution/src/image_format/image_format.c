@@ -34,3 +34,11 @@ bool image_set_pixel(const struct image target, const size_t row, const size_t c
 size_t image_calculate_size(const struct image image) {
     return sizeof(struct pixel) * image.width * image.height;
 }
+
+struct image image_copy(const struct image image) {
+    struct image ret = image_create(image.width, image.height);
+    for (size_t i = 0; i < image.width * image.height; i++) {
+        ret.data[i] = image.data[i];
+    }
+    return ret;
+}
