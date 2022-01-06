@@ -29,8 +29,8 @@ enum return_code apply_sepia(const struct image source, struct image* const targ
     }
     if (target->data != NULL) image_delete(*target);
     *target = working_copy;*/
-    struct pixel a[4] = {{200, 100, 50}, {10, 20 , 30}, {210, 110, 51}, {200, 100 , 50}};
-    struct pixel b = sepia_one(a + 3);
+    struct pixel a[5] = {{200, 100, 50}, {10, 20 , 30}, {210, 110, 51}, {200, 100 , 50}, {10, 20, 30}};
+    struct pixel b = sepia_one(a + 4);
     printf("%u %u %u\n", b.b, b.g, b.r);
     transform_chunk(a);
     return SUCCESS;
