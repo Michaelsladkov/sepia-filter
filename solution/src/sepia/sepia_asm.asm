@@ -50,10 +50,6 @@ initial_s2: dd 0.21, 0.3717, 0.4011, 0.21
 align 16
 initial_s3: dd 0.3227, 0.21, 0.31626, 0.3227
 
-section .bss
-align 16
-pixel_buffer: resd 24
-
 section .text
 ; chunk be like b1, g1, r1, b2, r2, g2, b3, g3, r3, b4, g4, r4
 ; rdi <- pixel chunk pointer 
@@ -72,8 +68,6 @@ transform_chunk:
     shufps xmm1, xmm1, 0b11000000
     shufps xmm2, xmm2, 0b11000000
     multiplicate_and_add
-    mov r9, pixel_buffer
-    movdqa [r9], xmm0 ; b1'|g1'|r1'|b2' -> buffer
     save_changed
     
     shift_matrix
@@ -85,7 +79,6 @@ transform_chunk:
     shufps xmm1, xmm1, 0b11110000
     shufps xmm2, xmm2, 0b11110000
     multiplicate_and_add
-    movdqa [r9], xmm0 ; b1'|g1'|r1'|b2' -> buffer
     save_changed
 
     shift_matrix
