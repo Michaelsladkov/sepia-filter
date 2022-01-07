@@ -1,12 +1,13 @@
+#include <stdio.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+
 #include "file_works/file_works.h"
 #include "image_format/image_format.h"
 #include "sepia/sepia.h"
 
 int main(int argc, char **argv)
 {
-    struct image im1 = {0}, im2 = {0};
-    apply_sepia(im1, &im2);
-
     if (argc < 3) {
         fprintf(stderr, "not enough args\n");
         return 0;
@@ -18,10 +19,38 @@ int main(int argc, char **argv)
     print_captioned_status("image reading status: ", image_read_status);
     if (image_read_status != SUCCESS) return 0;
     struct image transformed_image = {0};
+    struct image transformed_image_no_sse = {0};
+    
+    struct rusage r;
+    struct timeval start;
+    struct timeval end;
+    getrusage(RUSAGE_SELF, &r);
+    start = r.ru_utime;
+
     apply_sepia(input_image, &transformed_image);
+
+    getrusage(RUSAGE_SELF, &r);
+    end = r.ru_utime;
+    
+    const long sse_res = ((end.tv_sec - start.tv_sec) * 1000000L) + end.tv_usec - start.tv_usec;
+
+    getrusage(RUSAGE_SELF, &r);
+    start = r.ru_utime;
+
+    apply_sepia_no_sse(input_image, &transformed_image_no_sse);
+
+    getrusage(RUSAGE_SELF, &r);
+    end = r.ru_utime;
+    
+    const long no_sse_res = ((end.tv_sec - start.tv_sec) * 1000000L) + end.tv_usec - start.tv_usec;
+
     const enum return_code image_write_status = image_write_file_bmp(output_file_name, transformed_image);
+    image_write_file_bmp("reference.bmp", transformed_image_no_sse);
     print_captioned_status("image writing status: ", image_write_status);
     image_delete(input_image);
     image_delete(transformed_image);
+    image_delete(transformed_image_no_sse);
+    fprintf(stderr, "Time for sse in microseconds: %ld\n", sse_res);
+    fprintf(stderr, "Time for no sse in microseconds: %ld\n", no_sse_res);
     return 0;
 }

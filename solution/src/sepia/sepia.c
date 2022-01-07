@@ -8,9 +8,9 @@
 
 static struct pixel sepia_one (const struct pixel* const pixel) {
     static const float sepia_matrix[3][3] = {
-        {0.42f, 0.7f, 0.3f},
-        {0.3f, 0.6f, 0.208f},
-        {0.222f, 0.3f, 0.461f}
+        {0.1554f, 0.21f, 0.3227f},
+        {0.224f, 0.3717f, 0.21f},
+        {0.2653f, 0.4011f, 0.31626f}
     };
     struct pixel ret;
     const struct pixel old = *pixel;
@@ -20,19 +20,20 @@ static struct pixel sepia_one (const struct pixel* const pixel) {
     return ret;
 }
 
-void transform_chunk(struct pixel chunk[static 4]);
+void transform_chunk(struct pixel source[static 4], struct pixel* restrict target);
 
 enum return_code apply_sepia(const struct image source, struct image* const target) {
-    /*struct image working_copy = image_copy(source);
-    for(size_t i = 0; i < source.height * source.width; i += 4){
-        transform_chunk(working_copy.data + i);
+    struct image working_copy = image_create(source.width, source.height);
+    const size_t number_of_pixels = source.height * source.width;
+    for(size_t i = 0; i < number_of_pixels/4; i ++){
+        transform_chunk(source.data + 4 * i, working_copy.data + 4 * i);
+    }
+    for(size_t i = number_of_pixels - number_of_pixels % 4; i < number_of_pixels; i ++){
+        working_copy.data[i] = sepia_one(source.data + i);
     }
     if (target->data != NULL) image_delete(*target);
-    *target = working_copy;*/
-    struct pixel a[5] = {{200, 100, 50}, {10, 20 , 30}, {210, 110, 51}, {200, 100 , 50}, {10, 20, 30}};
-    struct pixel b = sepia_one(a + 4);
-    printf("%u %u %u\n", b.b, b.g, b.r);
-    transform_chunk(a);
+    *target = working_copy;
+
     return SUCCESS;
 }
 
