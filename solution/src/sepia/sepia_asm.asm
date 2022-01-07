@@ -18,6 +18,8 @@ global transform_chunk
     addps xmm0, xmm1
     addps xmm0, xmm2
     cvtps2dq xmm0, xmm0
+    mov r9, maximums
+    pminsd xmm0, [r9]
 %endmacro
 
 %macro clear_xmm1to3 0
@@ -49,6 +51,8 @@ align 16
 initial_s2: dd 0.21, 0.3717, 0.4011, 0.21
 align 16
 initial_s3: dd 0.3227, 0.21, 0.31626, 0.3227
+align 16
+maximums: dd 0xFF, 0xFF, 0xFF, 0xFF
 
 section .text
 ; chunk be like b1, g1, r1, b2, r2, g2, b3, g3, r3, b4, g4, r4
