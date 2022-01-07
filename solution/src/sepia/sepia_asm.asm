@@ -20,6 +20,28 @@ global transform_chunk
     cvtps2dq xmm0, xmm0
 %endmacro
 
+%macro clear_xmm1to3 0
+    pxor xmm0, xmm0
+    pxor xmm1, xmm1
+    pxor xmm2, xmm2
+%endmacro
+
+%macro load_pixels 0
+    pinsrb xmm0, [rdi], 0
+    pinsrb xmm0, [rdi+3], 12
+    pinsrb xmm1, [rdi+1], 0
+    pinsrb xmm1, [rdi+1+3], 12
+    pinsrb xmm2, [rdi+2], 0
+    pinsrb xmm2, [rdi+2+3], 12
+%endmacro
+
+%macro save_changed 0
+    pextrb [rsi], xmm0, 0
+    pextrb [rsi+1], xmm0, 4
+    pextrb [rsi+2], xmm0, 8
+    pextrb [rsi+3], xmm0, 12
+%endmacro
+
 section .rodata
 align 16
 initial_s1: dd 0.1554, 0.224, 0.2653, 0.1554
@@ -36,41 +58,6 @@ section .text
 ; chunk be like b1, g1, r1, b2, r2, g2, b3, g3, r3, b4, g4, r4
 ; rdi <- pixel chunk pointer 
 ; rsi <- target chunk pointer
-preload:
-    ;возьмём из чанка 6 чисел: b1, g1, r1, b2, g2, r2 на первой иттерации; b2, g2, r2, b3, g3, r3 на второй и b3, g3, r3, b4, g4, r4 на третьей
-    ;переложим их в буфер так, чтобы потом взять их в xmm
-    xor r8, r8
-    mov r9, pixel_buffer; сохраняем адрес буфера в регистре
-    .preload_loop:
-        mov al, byte [r8 + rdi]
-        mov rsi, r8
-        shl rsi, 2
-        mov [r9 + rsi], al
-        inc r8
-        cmp r8, 6
-        jl .preload_loop
-    ret
-
-; rdi <- pixel chunk pointer 
-save_changed:
-    xor r8, r8
-    mov r9, pixel_buffer
-    .save_loop:
-        mov rsi, r8
-        shl rsi, 2
-        xor rax, rax
-        mov al, byte [r9 + rsi]
-        cmp rax, 255
-        jb .write
-        mov rax, 255
-        .write:
-        mov [r8 + rdi], al
-        inc r8
-        cmp r8, 4
-        jl .save_loop
-    ret
-
-; rdi <- pixel chunk pointer 
 transform_chunk:
     ;загрузим в xmm3..5 столбцы матрицы
     mov r9, initial_s1
@@ -79,75 +66,36 @@ transform_chunk:
     movdqa xmm4, [r9]
     mov r9, initial_s3
     movdqa xmm5, [r9] 
-    push rdi
-    push rsi
-    call preload
-    pop rsi
-    pop rdi
-    mov r9, pixel_buffer
-    movdqa xmm0, [r9] ; b1|g1|r1|b2 -> xmm0
-    movdqa xmm1, [r9 + 16]; g2|r2|0|0 -> xmm1
-    movdqa xmm2, xmm1
-    shufps xmm2, xmm0, 0b10100101; r2|r2|r1|r1 -> xmm2
-    shufps xmm2, xmm2, 0b00111111; r1|r1|r1|r2 -> xmm2
-    shufps xmm1, xmm0, 0b01010000; g2|g2|g1|g1 -> xmm1
-    shufps xmm1, xmm1, 0b00111111; g1|g1|g1|g2 -> xmm1
-    shufps xmm0, xmm0, 0b11000000; b1|b1|b1|b2 -> xmm0
+    clear_xmm1to3
+    load_pixels
+    shufps xmm0, xmm0, 0b11000000
+    shufps xmm1, xmm1, 0b11000000
+    shufps xmm2, xmm2, 0b11000000
     multiplicate_and_add
+    mov r9, pixel_buffer
     movdqa [r9], xmm0 ; b1'|g1'|r1'|b2' -> buffer
-    push rdi
-    push rsi
-    mov rdi, rsi
-    call save_changed
-    pop rsi
-    pop rdi
+    save_changed
     
     shift_matrix
     add rdi, 3
     add rsi, 4
-    push rdi
-    push rsi
-    call preload
-    pop rsi
-    pop rdi
-    mov r9, pixel_buffer
-    movdqa xmm0, [r9] ; b2|g2|r2|b3 -> xmm0
-    movdqa xmm1, [r9 + 16]; g3|r3|0|0 -> xmm1
-    movdqa xmm2, xmm1
-    shufps xmm2, xmm0, 0b10100101; r3|r3|r2|r2 -> xmm2
-    shufps xmm2, xmm2, 0b00001111; r2|r2|r3|r3 -> xmm2
-    shufps xmm1, xmm0, 0b01010000; g3|g3|g2|g2 -> xmm1
-    shufps xmm1, xmm1, 0b00001111; g2|g2|g3|g3 -> xmm1
-    shufps xmm0, xmm0, 0b11110000; b2|b2|b3|b3 -> xmm0
-    check:
+    clear_xmm1to3
+    load_pixels
+    shufps xmm0, xmm0, 0b11110000
+    shufps xmm1, xmm1, 0b11110000
+    shufps xmm2, xmm2, 0b11110000
     multiplicate_and_add
     movdqa [r9], xmm0 ; b1'|g1'|r1'|b2' -> buffer
-    push rdi
-    push rsi
-    mov rdi, rsi
-    call save_changed
-    pop rsi
-    pop rdi
+    save_changed
 
     shift_matrix
     add rdi, 3
     add rsi, 4
-    push rdi
-    push rsi
-    call preload
-    pop rsi
-    pop rdi
-    mov r9, pixel_buffer
-    movdqa xmm0, [r9] ; b3|g3|r3|b4 -> xmm0
-    movdqa xmm1, [r9 + 16]; g4|r4|0|0 -> xmm1
-    movdqa xmm2, xmm1
-    shufps xmm2, xmm0, 0b10100101; r4|r4|r3|r3 -> xmm2
-    shufps xmm2, xmm2, 0b00000011; r3|r4|r4|r4 -> xmm2
-    shufps xmm1, xmm0, 0b01010000; g4|g4|g3|g3 -> xmm1
-    shufps xmm1, xmm1, 0b00000011; g3|g4|g4|g4 -> xmm1
-    shufps xmm0, xmm0, 0b11111100; b3|b4|b4|b4 -> xmm0
+    clear_xmm1to3
+    load_pixels
+    shufps xmm0, xmm0, 0b11111100
+    shufps xmm1, xmm1, 0b11111100
+    shufps xmm2, xmm2, 0b11111100
     multiplicate_and_add
-    movdqa [r9], xmm0 ; b1'|g1'|r1'|b2' -> buffer
-    mov rdi, rsi
-    call save_changed
+    save_changed
 ret
