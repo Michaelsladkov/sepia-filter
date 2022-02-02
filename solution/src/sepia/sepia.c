@@ -8,9 +8,9 @@
 
 static struct pixel sepia_one (const struct pixel* const pixel) {
     static const float sepia_matrix[3][3] = {
-        {0.1554f, 0.21f, 0.3227f},
-        {0.224f, 0.3717f, 0.21f},
-        {0.2653f, 0.4011f, 0.31626f}
+        {0.272f, 0.543f, 0.131},
+        {0.349f, 0.686f, 0.168f},
+        {0.393f, 0.769f, 0.189f}
     };
     struct pixel ret;
     const struct pixel old = *pixel;
