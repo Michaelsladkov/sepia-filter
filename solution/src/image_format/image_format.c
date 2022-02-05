@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+
+
 struct image image_create(const size_t width, const size_t height) 
 {
     struct image new_image = {0};
@@ -20,6 +22,7 @@ void image_delete(const struct image image)
 
 struct pixel image_get_pixel(const struct image source, const size_t row, const size_t column) 
 {
+    if (row >= source.height || column >= source.width) return EMPTY_PIXEL;
     return source.data[row * source.width + column];
 }
 

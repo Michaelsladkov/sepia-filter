@@ -19,7 +19,7 @@ SRC_DIR = $(SOLUTION_DIR)/src
 
 MKDIR = mkdir -p
 
-all: $(OBJDIR) $(BUILDDIR)  $(OBJDIR)/bmp_reader.o  $(OBJDIR)/bmp_writer.o  $(OBJDIR)/padding.o $(OBJDIR)/file_works.o $(OBJDIR)/image_format.o $(OBJDIR)/rotate.o $(OBJDIR)/saturation_arithmetic.o $(OBJDIR)/sepia.o $(OBJDIR)/sepia_asm.o $(OBJDIR)/util.o $(OBJDIR)/main.o
+all: $(OBJDIR) $(BUILDDIR)  $(OBJDIR)/bmp_reader.o  $(OBJDIR)/bmp_writer.o  $(OBJDIR)/padding.o $(OBJDIR)/file_works.o $(OBJDIR)/image_format.o $(OBJDIR)/rotate.o $(OBJDIR)/saturation_arithmetic.o $(OBJDIR)/matrix_transformations.o $(OBJDIR)/sepia.o $(OBJDIR)/sepia_asm.o $(OBJDIR)/n_to_1_transformations.o $(OBJDIR)/util.o $(OBJDIR)/main.o
 	$(LINKER) -g -o $(BUILDDIR)/main $(OBJDIR)/*.o
 
 $(OBJDIR)/bmp_reader.o: $(SRC_DIR)/bmp/bmp_reader.c
@@ -40,7 +40,10 @@ $(OBJDIR)/image_format.o: $(SRC_DIR)/image_format/image_format.c
 $(OBJDIR)/rotate.o: $(SRC_DIR)/rotate/rotate.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(OBJDIR)/saturation_arithmetic.o: $(SRC_DIR)/sepia/saturation_arithmetic.c
+$(OBJDIR)/saturation_arithmetic.o: $(SRC_DIR)/matrix_transformations/saturation_arithmetic.c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+$(OBJDIR)/matrix_transformations.o: $(SRC_DIR)/matrix_transformations/matrix_transformations.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(OBJDIR)/sepia.o: $(SRC_DIR)/sepia/sepia.c
@@ -49,6 +52,9 @@ $(OBJDIR)/sepia.o: $(SRC_DIR)/sepia/sepia.c
 $(OBJDIR)/sepia_asm.o: $(SRC_DIR)/sepia/sepia_asm.ASM
 	$(ASM) $(ASMFLAGS) $< -o $@
 
+$(OBJDIR)/n_to_1_transformations.o: $(SRC_DIR)/n_to_1_transformations/n_to_1_transformations.c
+	$(CC) -c $(CFLAGS) $< -o $@
+	
 $(OBJDIR)/util.o: $(SRC_DIR)/util/util.c
 	$(CC) -c $(CFLAGS) $< -o $@
 

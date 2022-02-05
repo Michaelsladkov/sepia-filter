@@ -3,15 +3,17 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include "saturation_arithmetic.h"
+#include "../matrix_transformations/matrix_transformations.h"
+#include "../matrix_transformations/saturation_arithmetic.h"
 #include "../util/util.h"
 
-static struct pixel sepia_one (const struct pixel* const pixel) {
-    static const float sepia_matrix[3][3] = {
+static const float sepia_matrix[3][3] = {
         {0.272f, 0.543f, 0.131},
         {0.349f, 0.686f, 0.168f},
         {0.393f, 0.769f, 0.189f}
     };
+
+static struct pixel sepia_one (const struct pixel* const pixel) {
     struct pixel ret;
     const struct pixel old = *pixel;
     ret.b = sat(old.b * sepia_matrix[0][0] + old.g * sepia_matrix[0][1] + old.r * sepia_matrix[0][2]);
@@ -38,15 +40,5 @@ enum return_code apply_sepia(const struct image source, struct image* const targ
 }
 
 enum return_code apply_sepia_no_sse(const struct image source, struct image* const target) {
-    if (target->data == NULL) image_delete(*target);
-    const size_t width = source.width;
-    const size_t height = source.height;
-    *target = image_create(width, height);
-    for (size_t i = 0; i < height; i++) {
-        for (size_t j = 0; j < width; j++) {
-            const struct pixel new_pixel = sepia_one(source.data + i * width + j);
-            image_set_pixel(*target, i, j, new_pixel);
-        }
-    }
-    return SUCCESS;
+    return apply_matrix_transformation(source, target, sepia_matrix);
 }

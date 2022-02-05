@@ -46,11 +46,11 @@ global transform_chunk
 
 section .rodata
 align 16
-initial_s1: dd 0.1554, 0.224, 0.2653, 0.1554
+initial_s1: dd 0.272, 0.349, 0.393, 0.272
 align 16
-initial_s2: dd 0.21, 0.3717, 0.4011, 0.21
+initial_s2: dd 0.543, 0.686, 0.769, 0.543
 align 16
-initial_s3: dd 0.3227, 0.21, 0.31626, 0.3227
+initial_s3: dd 0.131, 0.168, 0.189, 0.131
 align 16
 maximums: dd 0xFF, 0xFF, 0xFF, 0xFF
 

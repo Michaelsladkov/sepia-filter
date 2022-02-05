@@ -3,6 +3,6 @@
 
 #include <inttypes.h>
 
-uint8_t sat(uint64_t value);
+uint8_t sat(int64_t value);
 
 #endif

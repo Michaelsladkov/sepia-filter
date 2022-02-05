@@ -19,6 +19,8 @@ struct pixel
 };
 #pragma pack(pop)
 
+static const struct pixel EMPTY_PIXEL = {0};
+
 struct image image_create(const size_t width, const size_t height);
 void image_delete(const struct image image);
 struct pixel image_get_pixel(const struct image source, const size_t row, const size_t column);
